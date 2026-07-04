@@ -42,8 +42,8 @@ simulate_power <- function(
 
   reliability <- min(reliability, 0.999)
   E          <- N_weight * sqrt((1 - reliability) / reliability)
-  raw_effect <- effect * sqrt(N_weight^2 + E^2)   # = effect * N_weight / sqrt(reliability)
-
+  # raw_effect <- effect * sqrt(N_weight^2 + E^2)   # = effect * N_weight / sqrt(reliability)
+  raw_effect <- effect * N_weight
   power <- matrix(
     NA_real_,
     nrow     = length(M_values),
