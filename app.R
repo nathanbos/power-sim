@@ -309,7 +309,8 @@ ui <- fluidPage(
           br(),
           uiOutput("error_box"),
           uiOutput("table_header"),
-          DT::DTOutput("power_table")
+          DT::DTOutput("power_table"),
+          uiOutput("download_ui")
         ),
 
         tabPanel(
@@ -405,14 +406,19 @@ server <- function(input, output, session) {
       " Rows = items (M), columns = subjects (N).")
   })
 
-  output$power_table <- DT::renderDT({
+  power_table_df <- reactive({
     result <- sim_results()
     req(result)
 
-    mat  <- result$power
-    df   <- as.data.frame(mat)
-    df   <- cbind(Items = rownames(mat), df)
+    mat <- result$power
+    df  <- as.data.frame(mat)
+    df  <- cbind(Items = rownames(mat), df)
     rownames(df) <- NULL
+    df
+  })
+
+  output$power_table <- DT::renderDT({
+    df     <- power_table_df()
     n_cols <- names(df)[-1]
 
     DT::datatable(
@@ -431,6 +437,16 @@ server <- function(input, output, session) {
         fontWeight = "bold"
       )
   })
+
+  output$download_ui <- renderUI({
+    req(sim_results())
+    downloadButton("download_csv", "Download CSV", class = "btn-sm")
+  })
+
+  output$download_csv <- downloadHandler(
+    filename = function() sprintf("power_table_%s.csv", format(Sys.Date(), "%Y%m%d")),
+    content  = function(file) write.csv(power_table_df(), file, row.names = FALSE)
+  )
 
   # ── Simulation-run drill-down tabs ────────────────────────────────────────
   output$run_tabs_ui <- renderUI({
