@@ -246,7 +246,7 @@ ui <- fluidPage(
         "design", label = NULL,
         choices  = c("Between-subjects" = "between",
                      "Within-subjects"  = "within"),
-        selected = "between"
+        selected = "within"
       ),
       helpText(
         "Between: subjects split across conditions; all see the same items.",
@@ -254,11 +254,11 @@ ui <- fluidPage(
       ),
 
       div(class = "sidebar-section", div(class = "section-label", "Sample Sizes")),
-      textInput("N_values", "Subject counts (N)", value = "10, 20, 50, 100"),
+      textInput("N_values", "Subject counts (N)", value = "4, 8, 16, 32, 64, 128"),
       helpText("Comma-separated integers (2–500). At most 8 values."),
 
-      textInput("M_values", "Item counts (M)", value = "2, 5, 10, 20"),
-      helpText("Comma-separated integers. At most 8 values.",
+      textInput("M_values", "Item counts (M)", value = "2, 4, 8, 16, 32"),
+      helpText("Comma-separated integers (1–500). At most 8 values.",
                "Within-subjects requires M ≥ 2."),
 
       div(class = "sidebar-section", div(class = "section-label", "Effect & Measurement")),
@@ -273,6 +273,16 @@ ui <- fluidPage(
         "Low = noisy items; high = precise items. Typical range: 0.3–0.9."
       ),
 
+      div(class = "sidebar-section", div(class = "section-label", "Simulation")),
+      textInput("C", "Simulations per cell", value = "200"),
+      helpText("Whole number between 10 and 10 000.",
+               "More = stabler estimates; up to 100 runs are shown in the drill-down panels."),
+
+      numericInput("seed", "Random seed (optional)",
+                   value = NA, min = 1, max = 2147483647, step = 1),
+      helpText("Leave blank for a different result each run.",
+               "Enter any positive integer for a reproducible result."),
+
       div(class = "sidebar-section", div(class = "section-label", "Variability Weights")),
       numericInput("N_weight", "Subject variability weight",
                    value = 1, min = 0.1, max = 10, step = 0.1),
@@ -283,16 +293,6 @@ ui <- fluidPage(
                    value = 1, min = 0.1, max = 10, step = 0.1),
       helpText("SD of the item difficulty distribution.",
                "Only affects the within-subjects design (where items are split between conditions)."),
-
-      div(class = "sidebar-section", div(class = "section-label", "Simulation")),
-      textInput("C", "Simulations per cell", value = "200"),
-      helpText("Whole number between 10 and 10 000.",
-               "More = stabler estimates; up to 100 runs are shown in the drill-down panels."),
-
-      numericInput("seed", "Random seed (optional)",
-                   value = NA, min = 1, max = 2147483647, step = 1),
-      helpText("Leave blank for a different result each run.",
-               "Enter any positive integer for a reproducible result."),
 
       br(),
       actionButton("run_btn", "Run Simulation",
@@ -332,7 +332,7 @@ server <- function(input, output, session) {
 
     # ── Input validation ──────────────────────────────────────────────────────
     N_values <- parse_int_vector(input$N_values, min_val = 2L,  max_val = 500L)
-    M_values <- parse_int_vector(input$M_values, min_val = 1L,  max_val = 100L)
+    M_values <- parse_int_vector(input$M_values, min_val = 1L,  max_val = 500L)
     C_val    <- suppressWarnings(as.integer(trimws(input$C)))
 
     errs <- character(0)
@@ -345,7 +345,7 @@ server <- function(input, output, session) {
       errs <- c(errs, "Subject counts: between-subjects design needs N ≥ 4 (at least 2 per group).")
 
     if (is.null(M_values) || length(M_values) == 0)
-      errs <- c(errs, "Item counts: enter comma-separated integers between 1 and 100.")
+      errs <- c(errs, "Item counts: enter comma-separated integers between 1 and 500.")
     else if (length(M_values) > 8)
       errs <- c(errs, "Item counts: maximum 8 values.")
     else if (input$design == "within" && any(M_values < 2))
