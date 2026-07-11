@@ -36,19 +36,77 @@ The displayed power is simply the proportion of those simulated experiments wher
 
 ## Grounding Parameters in Empirical Data
 
-To set realistic baseline variances (`N_weight`, `M_weight`) and treatment heterogeneities (`sd_subj_slope`, `sd_item_slope`), you can extract these directly from pilot data using a linear mixed model. Ensure your pilot data is unaggregated (trial-level).
+To move beyond hypotheticals, you can extract realistic baseline variances (`N_weight`, `M_weight`) and treatment heterogeneities (`sd_subj_slope`, `sd_item_slope`) directly from empirical pilot data. 
 
-### 1. Estimating Subject Parameters
+Your pilot dataset must be unaggregated (trial-level format), meaning every row represents one response from one subject on one item. To extract item slopes, your experimental design must be fully crossed (i.e., items must appear in both the control and treatment conditions across your participant pool).
 
-Fit a model estimating baseline ability and individual treatment response:
+### Step 1: Fit the Maximal Mixed Model
+
+Using the `lme4` package in R, fit a model that estimates random intercepts and random slopes for both subjects and items:
 
 ```r
 library(lme4)
 
-# Fit model estimating baseline ability and individual treatment response
-fit_subj <- lmer(score ~ condition + 
-                   (1 + condition | subject) + 
-                   (1 | item), 
-                 data = pilot_data)
+# Fit the model with crossed random intercepts AND random slopes
+fit_max <- lmer(score ~ condition + 
+                  (1 + condition | subject) + 
+                  (1 + condition | item), 
+                data = pilot_data)
 
-summary(fit_subj)
+# View the variance components
+summary(fit_max)
+```
+
+### Step 2: Extract the Variance Components
+
+In the model summary, locate the `Random effects` section. It will look similar to this:
+
+```text
+Random effects:
+ Groups   Name        Variance Std.Dev. Corr
+ subject  (Intercept) 1.4400   1.2000       
+          condition   0.1225   0.3500   0.15
+ item     (Intercept) 0.6400   0.8000       
+          condition   0.0900   0.3000  -0.10
+ Residual             2.2500   1.5000       
+```
+
+You need the values from the **Std.Dev.** column:
+* **Subject (Intercept) `1.20`**: Represents baseline individual differences.
+* **Subject Condition `0.35`**: Represents variance in human treatment responsiveness.
+* **Item (Intercept) `0.80`**: Represents baseline item difficulty variance.
+* **Item Condition `0.30`**: Represents variance in task treatment effectiveness.
+
+### Step 3: Translate to Simulator Parameters
+
+You have two options for inputting these values into the simulator.
+
+**Option A: Use Raw Empirical Values (Recommended)**
+Enter the extracted standard deviations directly into the simulator UI or CLI script. 
+* `N_weight` = 1.20
+* `M_weight` = 0.80
+* `sd_subj_slope` = 0.35
+* `sd_item_slope` = 0.30
+* `effect` = Your empirical fixed effect estimate for `condition` divided by the total pooled baseline standard deviation.
+
+**Option B: Standardized Ratios (Leaving Weights at 1.0)**
+If you prefer to leave `N_weight` and `M_weight` at their default `1.0` settings to think purely in standardized units, you must convert your empirical slope standard deviations into ratios relative to their respective intercepts:
+
+$$ \text{Simulator sd\_subj\_slope} = \frac{\text{Empirical Subject Slope SD}}{\text{Empirical Subject Intercept SD}} = \frac{0.35}{1.20} = 0.29 $$
+
+$$ \text{Simulator sd\_item\_slope} = \frac{\text{Empirical Item Slope SD}}{\text{Empirical Item Intercept SD}} = \frac{0.30}{0.80} = 0.375 $$
+
+This perfectly calibrates the simulator's treatment heterogeneity to match the exact signal-to-noise ratio observed in your empirical environment.
+
+---
+
+## Benchmarking Against Classical Power Formulas (`pwr`)
+
+Because standard power calculators like the R `pwr` package assume a fixed, deterministic world devoid of heterogeneous slopes or measurement error, comparing the simulator to `pwr` requires temporarily turning off the simulation's psychometric realism.
+
+To successfully replicate `pwr.t.test` outputs:
+1. **Remove Treatment Variance:** Set `sd_subj_slope = 0` and `sd_item_slope = 0`.
+2. **Remove Measurement Error:** Set `reliability = 0.99` to ensure the true latent effect is equal to the observed effect. 
+3. **Account for Design Structure:**
+   * For **Within-Subjects**, you must mathematically adjust the Cohen's $d$ passed to `pwr` to account for the split-item variance scaling (the signal-to-noise ratio scales with the square root of $M$).
+   * For **Between-Subjects**, you can match the `pwr` output directly by pushing $M$ to a very large number (e.g., $M = 200$), which entirely averages away the item variance and asymptotes perfectly at your target effect size.
