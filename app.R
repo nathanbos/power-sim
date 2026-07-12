@@ -282,6 +282,9 @@ ui <- fluidPage(
     .error-box          { color: #c0392b; background: #fdf0ef;
                           border: 1px solid #e8b4b0; border-radius: 4px;
                           padding: 8px 12px; margin-bottom: 10px; }
+    #effect::-webkit-outer-spin-button,
+    #effect::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    #effect                            { -moz-appearance: textfield; }
   "))),
   
   titlePanel("Statistical Power Simulator"),
