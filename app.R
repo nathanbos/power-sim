@@ -122,7 +122,7 @@ simulate_power_shiny <- function(
     M_weight      = 1.0,
     sd_subj_slope = 0.0,
     sd_item_slope = 0.0,
-    reliability   = 0.5,
+    reliability   = 0.7,
     effect        = 0.5,
     C             = 200L,
     alpha         = 0.05,
@@ -287,7 +287,7 @@ ui <- fluidPage(
     #effect                            { -moz-appearance: textfield; }
   "))),
   
-  titlePanel("Statistical Power Simulator"),
+  titlePanel("PIPS Power Simulation"),
   
   sidebarLayout(
     sidebarPanel(
@@ -331,7 +331,7 @@ ui <- fluidPage(
       helpText("0.2 = small · 0.5 = medium · 0.8 = large"),
       
       sliderInput("reliability", "Per-item reliability",
-                  min = 0.10, max = 0.99, value = 0.50, step = 0.01),
+                  min = 0.10, max = 0.99, value = 0.70, step = 0.01),
       helpText(
         "Proportion of score variance that reflects true ability.",
         "Low = noisy items; high = precise items. Typical range: 0.3–0.9."

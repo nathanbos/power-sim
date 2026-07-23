@@ -2,7 +2,7 @@
 
 ## High-Level Description
 
-The Statistical Power Simulator is an interactive tool designed to evaluate how statistical power scales with the number of human subjects ($N$) and the number of test items or trials ($M$) in repeated-measures experimental designs. Its primary purpose is to expose the non-linear trade-offs between recruiting more participants and asking more questions, particularly in small-$N$ applied research contexts (e.g., UX testing, system evaluations).
+The PIPS Power Simulation is an interactive tool designed to evaluate how statistical power scales with the number of human subjects ($N$) and the number of test items or trials ($M$) in repeated-measures experimental designs. Its primary purpose is to expose the non-linear trade-offs between recruiting more participants and asking more questions, particularly in small-$N$ applied research contexts (e.g., UX testing, system evaluations).
 
 The simulation generates synthetic data under an additive mixed-effects structural model. It assumes that observations follow a continuous Gaussian distribution and that individual responses are a linear combination of latent participant ability, latent item difficulty, measurement error, and the experimental treatment effect.
 

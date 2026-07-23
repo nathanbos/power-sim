@@ -1,5 +1,5 @@
 # =============================================================================
-# Statistical Power Simulator: Subjects × Items (v2.0 - Methodological Upgrade)
+# PIPS Power Simulation: Subjects × Items (v2.0 - Methodological Upgrade)
 #
 # NEW FEATURES IN v2.0:
 # 1. Heterogeneous Treatment Slopes: Models real-world variance where items or 
@@ -18,7 +18,7 @@ simulate_power <- function(
     M_weight      = 1.0,   # SD of baseline item difficulty (random intercept w_0j)
     sd_subj_slope = 0.0,   # SD of subject treatment responsiveness (random slope u_1i)
     sd_item_slope = 0.0,   # SD of item treatment responsiveness (random slope w_1j)
-    reliability   = 0.5,   # per-item reliability: signal/(signal+noise), in (0, 1)
+    reliability   = 0.7,   # per-item reliability: signal/(signal+noise), in (0, 1)
     effect        = 0.5,   # target baseline Cohen's d
     C             = 200L,  # simulation repetitions per cell
     alpha         = 0.05,  # significance threshold

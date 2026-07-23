@@ -1,4 +1,4 @@
-# Statistical Power Simulator: Subjects × Items
+# PIPS Power Simulation: Subjects × Items
 
 An interactive, browser-based simulation illustrating how statistical power depends on the number of test subjects (N) and the number of test items or trials per subject (M).
 
@@ -78,3 +78,9 @@ shinylive::export(".", "docs")
 ```
 
 Then commit and push; the GitHub Actions workflow (`.github/workflows/pages.yml`) redeploys Pages automatically.
+
+---
+
+## License
+
+Licensed under the [Apache License, Version 2.0](LICENSE).
